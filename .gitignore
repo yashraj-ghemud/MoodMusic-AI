@@ -1,0 +1,26 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+
+# Environment files
+.env
+*.env
+backend/.env
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# OS clutter
+.DS_Store
+Thumbs.db
+
+# Model caches
+backend/models/*.onnx
+backend/models/*.caffemodel
+
+# Local logs
+*.log
