@@ -7,4 +7,4 @@ google-api-core==2.24.0
 googleapis-common-protos==1.63.1
 grpcio==1.62.2
 grpcio-status==1.62.2
-protobuf==4.25.3
+protobuf==5.28.0
