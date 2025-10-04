@@ -18,17 +18,3 @@ services:
         sync: false
       - key: FLASK_DEBUG
         value: "false"
-
-  - type: static
-    name: moodmusic-frontend
-    plan: free
-    buildCommand: |
-      rm -rf public
-      mkdir -p public/static
-      cp frontend/template/index.html public/index.html
-      cp -R frontend/static/. public/static/
-    staticPublishPath: public
-    autoDeploy: true
-    envVars:
-      - key: BACKEND_BASE_URL
-        value: https://moodmusic-backend.onrender.com
