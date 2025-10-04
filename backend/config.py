@@ -4,12 +4,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
-    # API Keys (You'll add these)
-    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'your-gemini-api-key-here')
-    YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY', 'your-youtube-api-key-here')
-    SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID', 'your-spotify-client-id-here')
-    
-    # Server config
-    DEBUG = True
-    HOST = '0.0.0.0'
-    PORT = 5000
+    """Application configuration sourced from environment variables."""
+
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
+    SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
+    SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+
+    DEBUG = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    HOST = os.getenv("HOST", "0.0.0.0")
+    PORT = int(os.getenv("PORT", "5000"))

@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: moodmusic-backend
+    env: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    autoDeploy: true
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: SPOTIFY_CLIENT_ID
+        sync: false
+      - key: SPOTIFY_CLIENT_SECRET
+        sync: false
+      - key: FLASK_DEBUG
+        value: "false"
+
+  - type: static
+    name: moodmusic-frontend
+    plan: free
+    buildCommand: |
+      rm -rf public
+      mkdir -p public/static
+      cp frontend/template/index.html public/index.html
+      cp -R frontend/static/. public/static/
+    staticPublishPath: public
+    autoDeploy: true
+    envVars:
+      - key: BACKEND_BASE_URL
+        value: https://moodmusic-backend.onrender.com
