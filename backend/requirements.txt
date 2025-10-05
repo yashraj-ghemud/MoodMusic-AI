@@ -7,4 +7,5 @@ requests==2.31.0
 python-dotenv==1.0.0
 onnxruntime==1.17.3
 deepface==0.0.91
+google-generativeai==0.7.1
 gunicorn==21.2.0
