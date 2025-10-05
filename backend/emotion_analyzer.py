@@ -218,6 +218,12 @@ class EmotionAnalyzer:
         return fer_label, fer_score, probabilities, bbox
 
     def _ensure_model_downloaded(self) -> None:
+        # Allow deployments to opt-out of runtime model downloads.
+        if os.getenv("DISABLE_MODEL_DOWNLOAD", "false").lower() == "true":
+            if not self._model_path.exists():
+                LOGGER.info("DISABLE_MODEL_DOWNLOAD=true and model not present; running without FER+ ONNX model.")
+            return
+
         if self._model_path.exists():
             return
 
@@ -365,6 +371,14 @@ class EmotionAnalyzer:
             return None
 
     def _ensure_file_downloaded(self, path: Path, url: str) -> None:
+        # Skip downloading files on platforms where writing to disk is not
+        # supported or when explicitly disabled via env var.
+        if os.getenv("DISABLE_MODEL_DOWNLOAD", "false").lower() == "true":
+            if path.exists():
+                return
+            LOGGER.info("DISABLE_MODEL_DOWNLOAD=true; not fetching %s", path.name)
+            return
+
         if path.exists():
             return
 

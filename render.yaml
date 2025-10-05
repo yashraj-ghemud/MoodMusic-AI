@@ -9,7 +9,10 @@ services:
       python --version
       pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+  # On free Render plans gunicorn may not be available in the runtime PATH.
+  # Fall back to running Flask directly. This is acceptable for demos and
+  # small-scale usage; consider switching back to gunicorn on paid tiers.
+  startCommand: python app.py
     autoDeploy: true
     envVars:
       - key: PYTHON_VERSION
