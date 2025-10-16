@@ -5,6 +5,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
+import logging
+import os
 
 from .config import Config
 from .emotion_analyzer import EmotionAnalyzer
@@ -25,6 +27,11 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 emotion_analyzer = EmotionAnalyzer()
 music_finder = MusicFinder()
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("moodmusic")
+logger.info("Starting MoodMusic backend - host=%s port=%s debug=%s", Config.HOST, Config.PORT, Config.DEBUG)
+logger.info("DISABLE_MODEL_DOWNLOAD=%s", os.getenv("DISABLE_MODEL_DOWNLOAD", "false"))
 
 
 @app.route("/")

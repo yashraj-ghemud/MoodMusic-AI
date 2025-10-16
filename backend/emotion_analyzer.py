@@ -10,14 +10,12 @@ import onnxruntime as ort
 import requests
 from PIL import Image
 
-try:
-    from deepface import DeepFace
-except Exception:  # pragma: no cover - optional dependency may fail at import time
-    DeepFace = None
+# Require DeepFace for emotion analysis
+from deepface import DeepFace
 
 
 class EmotionAnalyzer:
-    """ONNXRuntime-powered FER+ emotion detector with graceful fallbacks."""
+    """Emotion detector with DeepFace-only mode (default) and optional fallbacks."""
 
     MODEL_URL = (
         "https://raw.githubusercontent.com/onnx/models/main/vision/body_analysis/"
@@ -87,16 +85,29 @@ class EmotionAnalyzer:
         self._face_net = None
         self._deepface_backend = os.environ.get("DEEPFACE_BACKEND", "retinaface")
         self._deepface_available = DeepFace is not None
+        # Default to strict DeepFace-only unless explicitly disabled
+        self._use_deepface_only = os.getenv("USE_DEEPFACE_ONLY", "true").lower() == "true"
 
-        try:
-            self._ensure_model_downloaded()
-            self._session = ort.InferenceSession(str(self._model_path), providers=["CPUExecutionProvider"])
-            self._input_name = self._session.get_inputs()[0].name
-            self._output_name = self._session.get_outputs()[0].name
-        except Exception:
-            self._session = None
+        # If DeepFace-only is required but DeepFace is not installed, fail fast with a clear error
+        if self._use_deepface_only and not self._deepface_available:
+            raise ImportError(
+                "DeepFace is required (USE_DEEPFACE_ONLY=true) but it's not installed or failed to import."
+            )
 
-        self._face_net = self._load_face_detector()
+        # Only prepare ONNX FER+ session when not in DeepFace-only mode
+        if not self._use_deepface_only:
+            try:
+                self._ensure_model_downloaded()
+                self._session = ort.InferenceSession(
+                    str(self._model_path), providers=["CPUExecutionProvider"]
+                )
+                self._input_name = self._session.get_inputs()[0].name
+                self._output_name = self._session.get_outputs()[0].name
+            except Exception:
+                self._session = None
+
+        # Only attempt DNN face detector in non-DeepFace-only mode
+        self._face_net = None if self._use_deepface_only else self._load_face_detector()
         haar_face = os.path.join(cv2.data.haarcascades, "haarcascade_frontalface_default.xml")
         haar_smile = os.path.join(cv2.data.haarcascades, "haarcascade_smile.xml")
         self._face_detector = cv2.CascadeClassifier(haar_face) if os.path.exists(haar_face) else None
@@ -106,22 +117,40 @@ class EmotionAnalyzer:
         try:
             image = self._decode_image(image_data)
 
-            deepface_result = self._predict_with_deepface(image)
-
-            if deepface_result is not None:
+            if self._use_deepface_only:
+                deepface_result = self._predict_with_deepface(image)
+                if deepface_result is None:
+                    # Distinguish between no-face vs analysis failure for clearer UX
+                    _, has_face, _ = self._extract_face_region(image)
+                    if not has_face:
+                        return self._no_face_detected_response()
+                    return {
+                        "success": False,
+                        "error": "DeepFace analysis failed to determine emotion.",
+                        "code": "deepface_failed",
+                        "emotion": "neutral",
+                        "description": "We couldn't confidently read your expression. Try a clearer, front-facing photo.",
+                        "confidence": 0.0,
+                        "all_emotions": {},
+                    }
                 fer_label, fer_score, probabilities, bbox = deepface_result
             else:
-                face_region, has_face, bbox = self._extract_face_region(image)
-                if not has_face:
-                    return self._no_face_detected_response()
-
-                if self._session is not None:
-                    logits = self._run_inference(face_region)
-                    probabilities = self._softmax(logits)
-                    probabilities = self._contextualize_probabilities(probabilities, face_region, image, bbox)
-                    fer_label, fer_score = self._top_emotion(probabilities)
+                # Original mixed path: try DeepFace then fall back
+                deepface_result = self._predict_with_deepface(image)
+                if deepface_result is not None:
+                    fer_label, fer_score, probabilities, bbox = deepface_result
                 else:
-                    fer_label, fer_score, probabilities = self._heuristic_prediction(image, bbox)
+                    face_region, has_face, bbox = self._extract_face_region(image)
+                    if not has_face:
+                        return self._no_face_detected_response()
+
+                    if self._session is not None:
+                        logits = self._run_inference(face_region)
+                        probabilities = self._softmax(logits)
+                        probabilities = self._contextualize_probabilities(probabilities, face_region, image, bbox)
+                        fer_label, fer_score = self._top_emotion(probabilities)
+                    else:
+                        fer_label, fer_score, probabilities = self._heuristic_prediction(image, bbox)
 
             canonical_emotion = self.CANONICAL_EMOTIONS.get(fer_label, "neutral")
             description = self.EMOTION_DESCRIPTIONS.get(
