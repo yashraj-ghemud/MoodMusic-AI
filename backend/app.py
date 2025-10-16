@@ -41,7 +41,15 @@ def index():
 
 @app.route("/api/health", methods=["GET"])
 def health_check():
-    return jsonify({"status": "healthy", "message": "MoodMusic API is alive!"})
+    # Expose runtime flags so we can verify expected behavior on Render
+    info = {
+        "status": "healthy",
+        "message": "MoodMusic API is alive!",
+        "use_deepface_only": os.getenv("USE_DEEPFACE_ONLY", "true").lower() == "true",
+        "disable_model_download": os.getenv("DISABLE_MODEL_DOWNLOAD", "false").lower() == "true",
+        "deepface_backend": getattr(emotion_analyzer, "_deepface_backend", None),
+    }
+    return jsonify(info)
 
 
 @app.route("/api/analyze", methods=["POST"])

@@ -30,3 +30,5 @@ services:
         value: "true"
       - key: TF_USE_LEGACY_KERAS
         value: "false"
+      - key: DEEPFACE_BACKEND
+        value: "retinaface"
