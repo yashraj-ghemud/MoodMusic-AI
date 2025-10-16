@@ -1,32 +1,32 @@
 services:
-  services:
-    - type: web
-      name: moodmusic-backend
-      env: python
-      plan: free
-      rootDir: backend
-      pythonVersion: "3.10.13"
-      buildCommand: |
-        python --version
-        pip install --upgrade pip setuptools wheel
-        pip install -r requirements.txt
-      # On free Render plans gunicorn may not be available in the runtime PATH.
-      # Fall back to running Flask directly. This is acceptable for demos and
-      # small-scale usage; consider switching back to gunicorn on paid tiers.
-      startCommand: python app.py
-      autoDeploy: true
-      envVars:
-        - key: PYTHON_VERSION
-          value: "3.10.13"
-        - key: GEMINI_API_KEY
-          sync: false
-        - key: YOUTUBE_API_KEY
-          sync: false
-        - key: SPOTIFY_CLIENT_ID
-          sync: false
-        - key: SPOTIFY_CLIENT_SECRET
-          sync: false
-        - key: FLASK_DEBUG
-          value: "false"
-        - key: DISABLE_MODEL_DOWNLOAD
-          value: "true"
+  - type: web
+    name: moodmusic-backend
+    env: python
+    plan: free
+    rootDir: backend
+    pythonVersion: "3.10.13"
+    buildCommand: |
+      python --version
+      pip install --upgrade pip setuptools wheel
+      pip install -r requirements.txt
+    startCommand: gunicorn -w 2 -k gthread --threads 4 backend.app:app --bind 0.0.0.0:$PORT
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.10.13"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: SPOTIFY_CLIENT_ID
+        sync: false
+      - key: SPOTIFY_CLIENT_SECRET
+        sync: false
+      - key: FLASK_DEBUG
+        value: "false"
+      - key: DISABLE_MODEL_DOWNLOAD
+        value: "true"
+      - key: USE_DEEPFACE_ONLY
+        value: "true"
+      - key: TF_USE_LEGACY_KERAS
+        value: "false"
