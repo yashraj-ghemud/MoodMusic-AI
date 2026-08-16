@@ -1,5 +1,32 @@
-# MoodMusic-AI
-> Full‑stack prototype that infers a user's mood from an uploaded or captured image (or free‑form mood text) and returns a short curated playlist and a curator summary.
+<p align="center">
+  <img src="./.github/readme-assets/signal.gif" alt="Animated signal / product visual for MoodMusic-AI" width="100%" />
+</p>
+
+<h1 align="center">MoodMusic-AI</h1>
+
+<p align="center"><strong>Full‑stack prototype that infers a user's mood from an uploaded or captured image (or free‑form mood text) and returns a short curated playlist and a curator summary.</strong></p>
+
+<p align="center"><code>REPO//SIGNAL</code> · <code>SIGNAL / PRODUCT</code> · <code>LOOPING README EXPERIENCE</code></p>
+
+## Live signal
+
+| Lens | Readout |
+| --- | --- |
+| Portfolio lane | **SIGNAL / PRODUCT** |
+| Code surface | **24** tracked files observed |
+| Primary materials | **Python, Markdown, JavaScript, YAML** |
+| Verification | **0** test-related files observed |
+
+> A moving scan of the project surface. The animated frame above is a lightweight visual signature; the sections below remain the source of truth for implementation details.
+
+## Motion map
+
+`SIGNAL` → `SHAPE` → `RELEASE`
+
+Use the animated banner as the first signal, then move into the implementation dossier. The recommended next step is to verify the documented setup command against the repository scripts before extending the project.
+
+<details open>
+<summary><strong>Open the full project dossier</strong></summary>
 
 ## Overview
 MoodMusic-AI is a monolithic Flask backend that serves a single‑page frontend. The backend implements image‑based emotion detection (DeepFace first, with optional FER/ONNX fallbacks) and a MusicFinder component that can optionally call Google Gemini to generate playlist suggestions. A simple SPA provides camera capture, drag‑and‑drop upload, and mood input UI. A Render service manifest (render.yaml) is included for hosting the backend.
@@ -89,3 +116,9 @@ If you want to contribute:
 
 ## License
 No license file or explicit license statement was present in the supplied evidence, so no license is declared here.
+
+</details>
+
+---
+
+<p align="center"><sub>README motion system · visual layer by RepoSignal · implementation details remain project-specific</sub></p>
